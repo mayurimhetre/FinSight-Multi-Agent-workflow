@@ -1,4 +1,4 @@
-# 📈 FinSight — AI-Powered Investment Analyst
+# 📈 FinSight: AI-Powered Investment Analyst
 
 > A multi-agent financial research system built with LangGraph, RAG, Groq LLaMA, and Streamlit.  
 > Generates professional investment memos in minutes by orchestrating 4 specialised AI agents.
