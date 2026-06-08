@@ -122,13 +122,19 @@ Then open the URL, paste your **Groq API key** in the sidebar, select a ticker, 
 
 ```
 finsight/
-├── app.py                          # Streamlit frontend (Day 9)
-├── requirements.txt                # All dependencies
-├── README.md                       # This file
-├── notebooks/
-│   └── FinSight_Pipeline.ipynb     # Full Colab notebook (Days 1–8)
-└── data/
-    └── .gitkeep                    # Add your 10-K PDFs here (not committed)
+├── app.py
+├── requirements.txt
+├── README.md
+├── .gitignore
+└── src/
+    ├── config.py
+    ├── embeddings.py
+    ├── workflow.py
+    └── agents/
+        ├── news_agent.py
+        ├── rag_agent.py
+        ├── analyst_agent.py
+        └── report_agent.py
 ```
 
 ---
@@ -161,7 +167,7 @@ Supported tickers for live data only: any valid yfinance ticker (`MSFT`, `GOOGL`
 
 ---
 
-## 📋 10-Day Build Log
+## 📋 Process Followed
 
 | Day | Phase | What was built |
 |---|---|---|
@@ -178,13 +184,94 @@ Supported tickers for live data only: any valid yfinance ticker (`MSFT`, `GOOGL`
 
 ---
 
-## 🤝 Contributing
+## 📸 App Screenshots & Feature Walkthrough
 
-Pull requests welcome! Some ideas for extensions:
-- Add more tickers / 10-K documents to the FAISS index
-- Add a stock price chart (plotly)
-- Add portfolio comparison (multiple tickers side by side)
-- Deploy to Streamlit Cloud with secrets management
+> All screenshots below are from a live AAPL analysis run on the deployed app.
+
+---
+
+### 🏠 Dashboard — Live Metric Cards + Investment Memo
+
+![Investment Memo](screenshots/01_app.png)
+
+After clicking **Run FinSight Analysis**, the dashboard instantly populates with 5 live metric cards pulled from yfinance:
+
+| Metric | AAPL Example |
+|---|---|
+| Current Price | $307.34 |
+| Market Cap | $4.51T |
+| P/E (Trailing) | 37.16 |
+| Profit Margin | 27.15% |
+| Revenue Growth | 16.6% ▲ |
+
+Below the cards, the **Investment Memo tab** renders the full AI-generated report with 7 structured sections — Executive Summary, Company Overview, Financial Health, News & Sentiment, Risks, Valuation Assessment, and Recommendation. A **Download Memo** button lets you save the report as a `.md` file.
+
+---
+
+### 📊 Financial Ratios Tab
+
+![Financial Ratios](screenshots/01-fin-ratio.png)
+
+A structured breakdown of all key financial ratios across 4 categories, displayed as clean metric grids:
+
+**Valuation** — P/E Trailing (37.16), P/E Forward (31.99), Price/Book (42.33), Price/Sales (10.0), EV/EBITDA (28.32)
+
+**Profitability** — Profit Margin (27.15%), Operating Margin (32.27%), ROE (141.47%), ROA (26.23%)
+
+**Liquidity & Leverage** — Current Ratio (1.07), Quick Ratio (0.91), Debt/Equity (79.55)
+
+**Growth & Dividend** — Revenue Growth, Earnings Growth, Dividend Yield
+
+Below the grids, Groq LLaMA provides a **plain-language interpretation** of the ratios — assessing valuation, profitability, risk, and delivering a one-line verdict (Strong / Neutral / Weak).
+
+---
+
+### 📰 News & Sentiment Tab
+
+![News and Sentiment](screenshots/03-news.png)
+
+The **NewsAgent** fetches the latest headlines via DuckDuckGo and splits the output into two sections:
+
+- **Raw Headlines** — live snippet of news results for the ticker
+- **Sentiment Analysis** — structured LLM breakdown including:
+  - Overall sentiment (Positive / Negative / Neutral)
+  - Key themes (e.g. stock price surge, iPhone 17 launch, strategic extensions)
+  - Major events and announcements
+  - Short-term price impact assessment
+
+In the AAPL example, the agent identified a **positive sentiment** driven by Apple's stock comeback in late 2025, game-changing product innovations, and bullish investor outlook.
+
+---
+
+### 💬 Ask FinSight — RAG Chat Interface
+
+![Ask FinSight](screenshots/04-askfin.png)
+
+A conversational Q&A interface powered by **RAG over the 10-K annual report**. Users can either click a suggested question or type their own query in the chat input.
+
+**Suggested questions include:**
+- What are the main revenue segments for AAPL?
+- What risks does AAPL highlight in its 10-K?
+- How has AAPL's cash flow changed year over year?
+- What is AAPL's strategy for the next 3 years?
+
+All answers are grounded in the actual SEC filing — not hallucinated — using FAISS similarity search filtered to the selected company's document chunks.
+
+---
+
+### ✅ Recommendation — Valuation & Final Verdict
+
+![Recommendation](screenshots/05-recommendation.png)
+
+The final section of the Investment Memo delivers a **data-driven Buy / Hold / Sell recommendation**. For AAPL the analysis concluded:
+
+- **Valuation Assessment** — trailing P/E of 37.16 and price-to-book of 42.33 indicate a premium valuation, justified by strong growth prospects and brand strength. Target price: **$325** (based on forward P/E of 32.5 and 15% growth rate)
+- **Risks identified** — macroeconomic exposure, debt issuance limitations, reduced liquidity, high debt-to-equity ratio
+- **Recommendation: BUY** — exceptional profitability, innovative product pipeline, and competitive moat outweigh valuation concerns. Target price of $325 represents a **5.5% upside** from $307.34
+
+---
+
+> 💡 **Tip:** For best results, ensure the FAISS index contains the 10-K for your selected ticker. Live financial data and news work for any valid yfinance ticker even without a 10-K loaded.
 
 ---
 
