@@ -27,79 +27,30 @@ All via a clean Streamlit UI with metric cards, tabs, and a follow-up Q&A chat i
 ## 🏗️ Architecture
 
 ```
-                     ┌─────────────────────┐
-                    │    User Input        │
-                    │  (Ticker Symbol)     │
-                    │  e.g. AAPL, TSLA     │
-                    └──────────┬──────────┘
-                               │
-                               ▼
-      ┌────────────────────────────────────────────────────┐
-      │              LangGraph StateGraph                  │
-      │                                                    │
-      │   AgentState = { ticker, news, rag_context,        │
-      │                  financial_data, report }          │
-      │                                                    │
-      │  ┌─────────────────────────────────────────────┐  │
-      │  │  Node 1 — NewsAgent                         │  │
-      │  │  ┌─────────────────────────────────────┐    │  │
-      │  │  │  DuckDuckGo Search                  │    │  │
-      │  │  │  → Fetch latest headlines           │    │  │
-      │  │  │  → Groq LLaMA sentiment analysis    │    │  │
-      │  │  │  → Output: news + sentiment string  │    │  │
-      │  │  └─────────────────────────────────────┘    │  │
-      │  └──────────────────────┬──────────────────────┘  │
-      │                         │                          │
-      │                         ▼                          │
-      │  ┌─────────────────────────────────────────────┐  │
-      │  │  Node 2 — RAGAgent                          │  │
-      │  │  ┌─────────────────────────────────────┐    │  │
-      │  │  │  FAISS Vector Store                 │    │  │
-      │  │  │  → Filter chunks by company         │    │  │
-      │  │  │  → MiniLM-L6-v2 similarity search   │    │  │
-      │  │  │  → Groq LLaMA answer generation     │    │  │
-      │  │  │  → Output: 10-K insights summary    │    │  │
-      │  │  └─────────────────────────────────────┘    │  │
-      │  └──────────────────────┬──────────────────────┘  │
-      │                         │                          │
-      │                         ▼                          │
-      │  ┌─────────────────────────────────────────────┐  │
-      │  │  Node 3 — AnalystAgent                      │  │
-      │  │  ┌─────────────────────────────────────┐    │  │
-      │  │  │  yfinance API                       │    │  │
-      │  │  │  → Pull live price, market cap      │    │  │
-      │  │  │  → Calculate 15 financial ratios    │    │  │
-      │  │  │  → Groq LLaMA ratio interpretation  │    │  │
-      │  │  │  → Output: financial analysis block │    │  │
-      │  │  └─────────────────────────────────────┘    │  │
-      │  └──────────────────────┬──────────────────────┘  │
-      │                         │                          │
-      │                         ▼                          │
-      │  ┌─────────────────────────────────────────────┐  │
-      │  │  Node 4 — ReportAgent                       │  │
-      │  │  ┌─────────────────────────────────────┐    │  │
-      │  │  │  Groq LLaMA 3.3 70B                 │    │  │
-      │  │  │  → Aggregate all 3 agent outputs    │    │  │
-      │  │  │  → Generate structured memo prompt  │    │  │
-      │  │  │  → Output: investment memo markdown │    │  │
-      │  │  └─────────────────────────────────────┘    │  │
-      │  └──────────────────────┬──────────────────────┘  │
-      │                         │                          │
-      └─────────────────────────┼──────────────────────────┘
-                                │
-                                ▼
-           ┌────────────────────────────────────┐
-           │         Investment Memo             │
-           │  ┌──────────────────────────────┐  │
-           │  │  1. Executive Summary         │  │
-           │  │  2. Company Overview          │  │
-           │  │  3. Financial Health          │  │
-           │  │  4. News & Sentiment          │  │
-           │  │  5. Risks                     │  │
-           │  │  6. Valuation Assessment      │  │
-           │  │  7. Buy / Hold / Sell         │  │
-           │  └──────────────────────────────┘  │
-           └────────────────────────────────────┘
+                    User Input (Ticker)
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────┐
+│                  LangGraph Pipeline                 │
+│                                                     │
+│  ┌──────────────┐    ┌──────────────┐               │
+│  │ News Fetcher │───▶│  RAG Agent  │               │
+│  │ DuckDuckGo   │    │ FAISS + 10-K │               │
+│  └──────────────┘    └──────┬───────┘               │
+│                             │                       │
+│                      ┌──────▼───────┐               │
+│                      │   Analyst    │               │
+│                      │   yfinance   │               │
+│                      └──────┬───────┘               │
+│                             │                       │
+│                      ┌──────▼───────┐               │
+│                      │    Report    │               │
+│                      │    Writer    │               │
+│                      └──────┬───────┘               │
+└─────────────────────────────┼───────────────────────┘
+                              │
+                              ▼
+                  Investment Memo (Markdown)
 ```
 
 | Agent | Tool | Output |
