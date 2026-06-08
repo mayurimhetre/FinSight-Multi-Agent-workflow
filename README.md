@@ -277,15 +277,12 @@ The final section of the Investment Memo delivers a **data-driven Buy / Hold / S
 
 ## ⚠️ Disclaimer
 
-FinSight is a **portfolio project for educational purposes only**.  
-Nothing here constitutes financial advice. Always do your own research before making investment decisions.
+FinSight is a **portfolio project built purely for learning purposes**.
+
+This project was created to explore and understand **LangChain agentic AI workflows**, LangGraph orchestration, RAG pipelines, and multi-agent system design — not to provide financial guidance of any kind.
+
+Nothing in this project constitutes financial advice, investment recommendations, or market analysis intended for real-world use. Always do your own research and consult a qualified financial advisor before making any investment decisions.
 
 ---
 
-## 📄 License
 
-MIT License — see [LICENSE](LICENSE) for details.
-
----
-
-<p align="center">Built in 10 days · Powered by LangGraph + Groq + Streamlit</p>
